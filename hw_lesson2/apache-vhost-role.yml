@@ -1,0 +1,8 @@
+---
+- name: Apache Vhost role
+  hosts: lamp
+  user: ansible
+  become: true
+
+  roles:
+    - role: apache-vhost

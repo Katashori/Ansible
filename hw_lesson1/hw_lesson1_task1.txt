@@ -1,0 +1,90 @@
+[День1] Домашнее задание
+###
+1. Сконфигурировать /etc/ansible/ansible.cfg для
+возможностости эскалации привелегий
+----------------------------------------------------------------------
+On Control:
+[ansible@control ~]$ echo "[defaults]
+> remote_user = ansible
+> inventory = inventory
+>
+> [privilege_escalation]
+> become = True
+> become_method = sudo
+> become_user = root
+> become_ask_pass = False" > ansible.cfg
+======================================================================
+2. На управляющем и управляемом хостах создать пользователя
+“ansible”
+----------------------------------------------------------------------
+On All hosts:
+[vagrant@node1 ~]$ sudo su -
+[root@node1 ~]# useradd ansible
+[root@node1 ~]# echo password | passwd --stdin ansible
+Changing password for user ansible.
+passwd: all authentication tokens updated successfully.
+[root@node1 ~]# echo "ansible ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/ansible
+[root@node1 ~]#
+======================================================================
+3. Используя ad-hoc команды и модуль “command” запросить
+hostname’ы у всех управляемых хостов. Сделать это от пользователя
+“ansible”
+----------------------------------------------------------------------
+On Control:
+[ansible@control ~]$ ansible -i inventory all -a "hostname"
+node2.example.com | CHANGED | rc=0 >>
+node2.example.com
+
+node1.example.com | CHANGED | rc=0 >>
+node1.example.com
+
+======================================================================
+4. Добавить строку “Hello from Ansible” в файл /etc/motd на
+всех управляемых хостах.
+----------------------------------------------------------------------
+On Control:
+[ansible@control ~]$ ansible -i inventory all -a 'echo "Hello from Ansible" >> /etc/motd'
+node1.example.com | CHANGED | rc=0 >>
+Hello from Ansible >> /etc/motd
+
+node2.example.com | CHANGED | rc=0 >>
+Hello from Ansible >> /etc/motd
+======================================================================
+###
+1. Запросите список всех доступных модулей
+----------------------------------------------------------------------
+On Control:
+[ansible@control ~]$ ansible-doc -l
+======================================================================
+2. Посмотрите документацию для модулей, которые позволяют
+управлять пользователями в системе.
+----------------------------------------------------------------------
+https://docs.ansible.com/ansible/latest/modules/user_module.html
+======================================================================
+3. Какие модули вы нашли? Как можно их использовать?
+----------------------------------------------------------------------
+user (for Windows - win_user) - создавать, редактировать пользователей, их пароли, роли, ключи, группы
+======================================================================
+###
+1. Создайте плэйбук, выполняющий установку веб-сервера Apache на
+управляемом хосте со следующими требованиями:
+- установка пакета httpd;
+- включение службы веб-сервера и проверка, что он запущен;
+- создание файла /var/www/html/index.html с текстом “Welcome to my
+web server”;
+- используйте модуль firewalld для того, чтобы открыть необходимые
+для работы веб-сервера порты брендмауэра;
+----------------------------------------------------------------------
+ansible-playbook -i inventory install-httpd.yml
+======================================================================
+2. Отключите службу NetworkManager
+Измените файл /etc/default/grub и добавьте параметры net.ifnames=0
+и biosdevname=0 в строку, выполняющую загрузку ядра.
+Выполните grub2-mkconfig, чтобы записать изменения в
+/etc/default/grub
+Используйте модуль lineinfile для изменения конфигурациионого
+файла
+----------------------------------------------------------------------
+ansible-playbook -i inventory configure-network-manager-grub.yml
+======================================================================
+###

@@ -1,0 +1,13 @@
+---
+- name: Create a directory if it does not exist
+  file:
+    path: /var/www/{{ ansible_hostname }}
+    state: directory
+    mode: '0755'
+- name: copy vhost file
+  template:
+    src: templates/vhost.j2
+    dest: /etc/httpd/{{ ansible_fqdn }}.conf
+    owner: root
+    group: root
+    mode: 0444
