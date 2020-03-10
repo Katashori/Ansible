@@ -1,0 +1,44 @@
+---
+- hosts: all
+  vars:
+    anonymous_enable: 'YES'
+    anon_upload_enable: 'YES'
+
+  tasks:
+    - name: Install FTP
+      yum:
+        name: vsftpd
+        state: latest
+
+    - name: Start FTP
+      service:
+        name: vsftpd
+        state: started
+
+    - name: Config vsftp
+      template:
+        src: vsftp.conf.j2
+        dest: /etc/vsftpd/vsftpd.conf
+
+    - name: Config /var/ftp/pub
+      file:
+        path: /var/ftp/pub
+        state: directory
+        mode: 0755
+
+    - name: Allow Web service in Firewall
+      firewalld: service=http permanent=true state=enabled immediate=true
+
+    - name: Allow FTP service in Firewall
+      firewalld: port=21/tcp permanent=true state=enabled immediate=true
+
+    - name: ftpd_anon_write on
+      command: setsebool -P ftpd_anon_write on
+
+    - name: Install semanage
+      yum:
+        name: policycoreutils-python
+        state: latest
+
+    - name: context
+      command: semanage fcontext -a -t public_content_rw_t "/var/ftp/pub(/.*)?"

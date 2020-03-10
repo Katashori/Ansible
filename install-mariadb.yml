@@ -1,0 +1,11 @@
+---
+- hosts: all
+  tasks:
+  - name: Check file database
+    stat:
+      path: /tmp/database
+    register: stat_result
+
+  - name: install maria-db
+    yum: name=mariadb-server state=latest
+    when: stat_result.stat.exists == True

@@ -75,70 +75,7 @@ web server”;
 - используйте модуль firewalld для того, чтобы открыть необходимые
 для работы веб-сервера порты брендмауэра;
 ----------------------------------------------------------------------
----
-- hosts: all
-  tasks:
-  - name: install httpd*
-    yum: name=httpd state=latest
-
-  - name: Start httpd
-    service:
-      name: httpd
-      state: started
-
-  - name: Create file
-    copy:
-      content: "Welcome to my web server"
-      dest: "/var/www/html/index.html"
-
-  - name: Open port 80 for http access
-    firewalld:
-      service: http
-      permanent: true
-      state: enabled
-
-  - name: Restart the firewalld service to load in the firewall changes
-    service:
-      name: firewalld
-      state: restarted
-
-----------------------------------------------------------------------
-[ansible@control ~]$ ansible-playbook httpd.yaml
-
-PLAY [all] *************************************************************************************************************
-
-TASK [Gathering Facts] *************************************************************************************************
-ok: [node2.example.com]
-ok: [node1.example.com]
-
-TASK [install httpd*] **************************************************************************************************
-changed: [node2.example.com]
-changed: [node1.example.com]
-
-TASK [Start httpd] *****************************************************************************************************
-changed: [node1.example.com]
-changed: [node2.example.com]
-
-TASK [Create file] *****************************************************************************************************
-changed: [node2.example.com]
-changed: [node1.example.com]
-
-TASK [Open port 80 for http access] ************************************************************************************
-changed: [node1.example.com]
-changed: [node2.example.com]
-
-TASK [Restart the firewalld service to load in the firewall changes] ***************************************************
-changed: [node1.example.com]
-changed: [node2.example.com]
-
-PLAY RECAP *************************************************************************************************************
-node1.example.com          : ok=6    changed=5    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
-node2.example.com          : ok=6    changed=5    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
-
-[ansible@control ~]$ curl node1
-Welcome to my web server
-[ansible@control ~]$ curl node2
-Welcome to my web server
+install-httpd.yml
 ======================================================================
 2. Отключите службу NetworkManager
 Измените файл /etc/default/grub и добавьте параметры net.ifnames=0
@@ -148,20 +85,6 @@ Welcome to my web server
 Используйте модуль lineinfile для изменения конфигурациионого
 файла
 ----------------------------------------------------------------------
----
-- hosts: all
-  tasks:
-  - name: disable NetworkManager
-    service:
-      name: NetworkManager
-      state: stopped
-  - name: add params grub
-    lineinfile:
-      dest: /etc/default/grub
-      regexp: '^GRUB_CMDLINE_LINUX'
-      line: 'GRUB_CMDLINE_LINUX="no_timer_check console=tty0 console=ttyS0,115200n8 net.ifnames=0 biosdevname=0 elevator=noop crashkernel=auto"'
-  - name: reload grub config
-    command: grub2-mkconfig
-
+configure-network-manager-grub.yml
 ======================================================================
 ###

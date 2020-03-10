@@ -1,0 +1,14 @@
+---
+- hosts: all
+  tasks:
+  - name: disable NetworkManager
+    service:
+      name: NetworkManager
+      state: stopped
+  - name: add params grub
+    lineinfile:
+      dest: /etc/default/grub
+      regexp: '^GRUB_CMDLINE_LINUX'
+      line: 'GRUB_CMDLINE_LINUX="no_timer_check console=tty0 console=ttyS0,115200n8 net.ifnames=0 biosdevname=0 elevator=noop crashkernel=auto"'
+  - name: reload grub config
+    command: grub2-mkconfig
